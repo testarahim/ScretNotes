@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import  messagebox
 from PIL import ImageTk, Image
 import os
+import cryptocode
 
 window = Tk()
 window.title("Secret Notes")
@@ -29,27 +30,42 @@ masterKey_label.pack()
 masterKey_entry = Entry(width=40)
 masterKey_entry.pack()
 
+
+# encoded = cryptocode.encrypt(notes_text.get("1.0", END), masterKey_entry.get())
+# decoded = cryptocode.decrypt(encoded, masterKey_entry.get())
 def save_and_enc_button_check():
     title = title_entry.get()
-    note = notes_text.get()
-    if title == "" or note == "":
-    messagebox.showwarning("Warning!", "Please enter all information")
+    note = notes_text.get("1.0",END)
+    masterkey = masterKey_entry.get()
+    encoded = cryptocode.encrypt(notes_text.get("1.0", END), masterkey)
+    if title == "" or note == "" or masterkey == "":
+        messagebox.showwarning("Warning!", "Please enter all information")
+    else:
+        f = open("SecretNotes.txt", "a")
+        f.write("\n" + title + "\n")
+        f.write(encoded)
+        f.close()
+        notes_text.delete("1.0", END)
+        title_entry.delete(0,"end")
+        masterKey_entry.delete(0, "end")
+def decrypt():
 
-#TODO save butonuna basıldığında öncelikle entry'leri kontrol et boşsa utarı mesajı bas,
-#TODO save butonuna basıldığında bir adet txt dosyası oluştur ve bu dosya içerisine title ve notu yazdır
-#TODO save butonuna basılınca notu encrypt'li bir şekilde yazdır.
-#TODO Decrpyt butonuna basıldığında kriptolanmış not dekirpto şekilde gözükmesini sağla
-#TODO Decrpyt butonuna basıldığında master key doğru girildiyse mesajı doğru bir şekilde decrptyt et değilse yanlış yap yada hata ver.
-def save_button():
-    pass
+    note = notes_text.get("1.0", END)
+    masterkey = masterKey_entry.get()
+    decoded = cryptocode.decrypt(note, masterkey)
+
+    if decoded == False:
+        messagebox.showerror("Error!", "Wrong master key, Please enter correct master key!")
+    else:
+        notes_text.delete("1.0", END)
+        notes_text.insert(END, decoded)
 
 #Save&Encrpy button packing
-save_encrypt_button = Button(text="Save & Encrypt",command=save_button)
+save_encrypt_button = Button(text="Save & Encrypt",command=save_and_enc_button_check)
 save_encrypt_button.pack()
 
-
 #Decrypt button packing
-decrypt_button = Button(text="Decrypt")
+decrypt_button = Button(text="Decrypt", command=decrypt)
 decrypt_button.pack()
 
 
